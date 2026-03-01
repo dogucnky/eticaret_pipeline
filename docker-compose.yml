@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   veritabani:
     image: postgres:15
@@ -9,3 +10,39 @@ services:
       - POSTGRES_DB=eticaret_db
     ports:
       - "5433:5432"
+
+  airflow-init:
+    image: apache/airflow:2.7.1
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:123456@veritabani:5432/eticaret_db
+    # İlk kurulumda veritabanını hazırlar ve 'airflow' kullanıcısını oluşturur
+    command: db init && airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com
+    depends_on:
+      - veritabani
+
+  airflow-webserver:
+    image: apache/airflow:2.7.1
+    container_name: airflow_webserver
+    depends_on:
+      - veritabani
+    ports:
+      - "8080:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:123456@veritabani:5432/eticaret_db
+    command: webserver
+    volumes:
+      - ./dags:/opt/airflow/dags
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.1
+    container_name: airflow_scheduler
+    depends_on:
+      - veritabani
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:123456@veritabani:5432/eticaret_db
+    command: scheduler
+    volumes:
+      - ./dags:/opt/airflow/dags
