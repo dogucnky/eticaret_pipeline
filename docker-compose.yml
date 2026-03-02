@@ -17,7 +17,7 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:123456@veritabani:5432/eticaret_db
     # İlk kurulumda veritabanını hazırlar ve 'airflow' kullanıcısını oluşturur
-    command: db init && airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com
+    command: db init && airflow users create --username dogukan --password 123456 --firstname Admin --lastname User --role Admin --email admin@example.com
     depends_on:
       - veritabani
 
@@ -31,7 +31,8 @@ services:
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:123456@veritabani:5432/eticaret_db
-    command: webserver
+    command: >
+      bash -c "pip install --no-cache-dir psycopg2-binary && airflow webserver"
     volumes:
       - ./dags:/opt/airflow/dags
 
@@ -43,6 +44,7 @@ services:
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:123456@veritabani:5432/eticaret_db
-    command: scheduler
+    command: >
+      bash -c "pip install --no-cache-dir psycopg2-binary && airflow scheduler"
     volumes:
       - ./dags:/opt/airflow/dags

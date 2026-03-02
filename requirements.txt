@@ -1,1 +1,4 @@
 psycopg2-binary==2.9.8
+apache-airflow==2.7.1
+logging==2.0.0
+pandas==2.0.3
